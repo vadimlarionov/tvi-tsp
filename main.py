@@ -105,11 +105,11 @@ class Tour:
 class Population:
     def __init__(self, tour_manager, population_size, initialise):
         self.tours = []
-        for i in range(0, population_size):
+        for _ in range(population_size):
             self.tours.append(None)
 
         if initialise:
-            for i in range(0, population_size):
+            for i in range(population_size):
                 new_tour = Tour(tour_manager)
                 new_tour.generate_individual()
                 self.save_tour(i, new_tour)
@@ -128,7 +128,7 @@ class Population:
 
     def get_fittest(self):
         fittest = self.tours[0]
-        for i in range(0, self.population_size()):
+        for i in range(self.population_size()):
             if fittest.get_fitness() <= self.get_tour(i).get_fitness():
                 fittest = self.get_tour(i)
         return fittest
@@ -144,16 +144,16 @@ class GA:
         self.tournamentSize = 5
         self.elitism = True
 
-    def evolve_population(self, pop):
-        new_population = Population(self.tour_manager, pop.population_size(), False)
+    def evolve_population(self, population):
+        new_population = Population(self.tour_manager, population.population_size(), False)
         elitism_offset = 0
         if self.elitism:
-            new_population.save_tour(0, pop.get_fittest())
+            new_population.save_tour(0, population.get_fittest())
             elitism_offset = 1
 
         for i in range(elitism_offset, new_population.population_size()):
-            parent1 = self.tournament_selection(pop)
-            parent2 = self.tournament_selection(pop)
+            parent1 = self.tournament_selection(population)
+            parent2 = self.tournament_selection(population)
             child = self.crossover(parent1, parent2)
             new_population.save_tour(i, child)
 
@@ -185,7 +185,7 @@ class GA:
         return child
 
     def mutate(self, tour):
-        for tour_pos_1 in range(0, tour.tour_size()):
+        for tour_pos_1 in range(tour.tour_size()):
             if random.random() < self.mutationRate:
                 tour_pos_2 = int(tour.tour_size() * random.random())
 
@@ -214,6 +214,7 @@ def plot(solution):
     plt.axis([min(x_values) - 10, max(x_values) + 10, min(y_values) - 10, max(y_values) + 10])
     plt.xlabel('X-axis')
     plt.ylabel('Y-axis')
+    plt.grid(True)
     plt.show()
 
 
@@ -222,13 +223,13 @@ def __main():
     tour_manager.load_data()
 
     # Initialize population
-    population = Population(tour_manager, 100, True)
+    population = Population(tour_manager, 500, True)
     print('Initial distance: ' + str(population.get_fittest().get_distance()))
 
     # Evolve population for 100 generations
     ga = GA(tour_manager)
     population = ga.evolve_population(population)
-    for _ in range(100):
+    for _ in range(200):
         population = ga.evolve_population(population)
 
     print('Finished')
